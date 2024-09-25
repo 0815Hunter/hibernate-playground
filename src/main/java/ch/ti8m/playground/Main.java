@@ -2,10 +2,7 @@ package ch.ti8m.playground;
 
 import ch.ti8m.playground.model.Bericht;
 import ch.ti8m.playground.model.Entwurf;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -18,31 +15,37 @@ public class Main {
 
         initManager();
 
+        if (false) {
+            inTransaction(entityManager -> {
+                List<Bericht> berichte = entityManager.createQuery("SELECT a FROM Bericht a", Bericht.class).getResultList();
+                List<Entwurf> entwuerfe = entityManager.createQuery("SELECT a FROM Entwurf a", Entwurf.class).getResultList();
+
+                berichte.forEach(entityManager::remove);
+                entwuerfe.forEach(entityManager::remove);
+            });
+            return;
+        }
+
         Entwurf entwurf = new Entwurf();
-        Bericht bericht1 = new Bericht();
-        Bericht bericht2 = new Bericht();
-
-        inTransaction(entityManager -> {
-            List<Bericht> berichte = entityManager.createQuery("SELECT a FROM Bericht a", Bericht.class).getResultList();
-            List<Entwurf> entwuerfe = entityManager.createQuery("SELECT a FROM Entwurf a", Entwurf.class).getResultList();
-
-            berichte.forEach(entityManager::remove);
-            entwuerfe.forEach(entityManager::remove);
-        });
-
+        // save Entwurf and Bericht
         inTransaction(entityManager -> {
             entityManager.persist(entwurf);
-            entwurf.setBericht(bericht1);
+            entwurf.setBericht(new Bericht());
         });
 
         Bericht oldBericht = entwurf.getBericht();
-        oldBericht.setArchived(true);
+        entwurf.setBericht(new Bericht());
 
-        entwurf.setBericht(bericht2);
-
+        // add new Bericht, delete(archive) old bericht
         inTransaction(entityManager -> {
-            entityManager.merge(entwurf);
-            entityManager.merge(oldBericht);
+            Entwurf mergedEntwurf = entityManager.merge(entwurf);
+            Bericht oldBerichtToDelete = entityManager.find(Bericht.class, oldBericht.getBerichtId());
+
+            if (mergedEntwurf == oldBerichtToDelete.getEntwurf()) {
+                System.out.println("Equal!");
+            }
+
+            entityManager.remove(oldBerichtToDelete);
         });
 
     }

@@ -19,6 +19,9 @@ public class Entwurf {
     @JoinColumn(name = "FK_ActiveBerichtId", referencedColumnName = "BerichtId")
     private Bericht bericht;
 
+    @Column(name = "Content")
+    private String content;
+
     public void setBericht(Bericht bericht) {
         bericht.setEntwurf(this);
         this.bericht = bericht;
