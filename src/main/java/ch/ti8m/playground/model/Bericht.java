@@ -17,6 +17,9 @@ public class Bericht {
     @Column(name = "BerichtId")
     private Integer berichtId;
 
+    @Column(name = "Archived", nullable = false)
+    private boolean archived = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_EntwurfId", referencedColumnName = "EntwurfId")
     private Entwurf entwurf;

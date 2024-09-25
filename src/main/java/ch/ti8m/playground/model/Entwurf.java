@@ -15,6 +15,9 @@ public class Entwurf {
     @Column(name = "EntwurfId")
     private Integer entwurfId;
 
+    @Column(name = "Archived", nullable = false)
+    private boolean archived = false;
+
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "FK_ActiveBerichtId", referencedColumnName = "BerichtId")
     private Bericht bericht;
